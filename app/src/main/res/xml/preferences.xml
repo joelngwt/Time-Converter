@@ -1,24 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <CheckBoxPreference
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:key="@string/date_picker_preference_key"
         android:title="Show date picker"
         android:defaultValue="true" />
-
-    <!-- Does not work before android 4.4
-    android:summary="%s"
-    -->
 
     <ListPreference
         android:defaultValue="12 hour"
         android:entries="@array/time_formats_array"
         android:entryValues="@array/time_formats_array"
         android:key="@string/time_format_preference_key"
-        android:summary="@string/time_format_summary"
-        android:title="@string/time_format_title" />
+        android:title="@string/time_format_title"
+        app:useSimpleSummaryProvider="true" />
 </PreferenceScreen>
