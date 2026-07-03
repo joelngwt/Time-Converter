@@ -1,5 +1,7 @@
 package bloodelves88.android.timeconverter;
 
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
@@ -11,15 +13,16 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
-import com.example.android.timeconverter.R;
-
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 import java.util.TimeZone;
 
 
@@ -31,12 +34,17 @@ public class MainActivity extends AppCompatActivity {
             "Consider using %s instead";
     private static final int SETTINGS_DONE = 1;
     private boolean is12HourFormat = true;
+    private Calendar inputCalendar = Calendar.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+        inputCalendar.set(Calendar.MINUTE, 0);
+        inputCalendar.set(Calendar.SECOND, 0);
+        inputCalendar.set(Calendar.MILLISECOND, 0);
 
         updateUIUsingSettings();
 
@@ -67,26 +75,52 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Set the time to the current hour on start
-        TimePicker timePicker = (TimePicker) findViewById(R.id.timePicker);
-        timePicker.setCurrentMinute(0);
-        timePicker.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
-
-            public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
-                convertTime();
+        Button timeButton = (Button) findViewById(R.id.timeButton);
+        timeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new TimePickerDialog(MainActivity.this, new TimePickerDialog.OnTimeSetListener() {
+                    @Override
+                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                        inputCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                        inputCalendar.set(Calendar.MINUTE, minute);
+                        updateInputButtons();
+                        convertTime();
+                    }
+                }, inputCalendar.get(Calendar.HOUR_OF_DAY), inputCalendar.get(Calendar.MINUTE), !is12HourFormat).show();
             }
         });
 
-        // Set the date picker to today's date on start
-        DatePicker datePicker = (DatePicker) findViewById(R.id.datePicker);
-        datePicker.init(datePicker.getYear(), datePicker.getMonth(), datePicker.getDayOfMonth(),
-            new DatePicker.OnDateChangedListener() {
+        Button dateButton = (Button) findViewById(R.id.dateButton);
+        dateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new DatePickerDialog(MainActivity.this, new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                        inputCalendar.set(Calendar.YEAR, year);
+                        inputCalendar.set(Calendar.MONTH, month);
+                        inputCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                        updateInputButtons();
+                        convertTime();
+                    }
+                }, inputCalendar.get(Calendar.YEAR), inputCalendar.get(Calendar.MONTH), inputCalendar.get(Calendar.DAY_OF_MONTH)).show();
+            }
+        });
 
-                @Override
-                public void onDateChanged(DatePicker view, int year, int month, int day) {
-                    convertTime();
-                }
-            });
+        updateInputButtons();
+    }
+
+    private void updateInputButtons() {
+        Button dateButton = (Button) findViewById(R.id.dateButton);
+        Button timeButton = (Button) findViewById(R.id.timeButton);
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.US);
+        dateButton.setText(dateFormat.format(inputCalendar.getTime()));
+
+        String timePattern = is12HourFormat ? "h:mm a" : "HH:mm";
+        SimpleDateFormat timeFormat = new SimpleDateFormat(timePattern, Locale.US);
+        timeButton.setText(timeFormat.format(inputCalendar.getTime()));
     }
 
     @Override
@@ -130,16 +164,15 @@ public class MainActivity extends AppCompatActivity {
     private void updateUIUsingSettings() {
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-        DatePicker datePicker = (DatePicker) findViewById(R.id.datePicker);
-        TextView dateText = (TextView) findViewById(R.id.dateText);
+        Button dateButton = (Button) findViewById(R.id.dateButton);
 
-        boolean isDatePickerShown = sharedPrefs.getBoolean(getString(R.string.date_picker_preference_key), true);
-        if (isDatePickerShown) {
-            datePicker.setVisibility(View.VISIBLE);
-            dateText.setVisibility(View.VISIBLE);
-        } else {
-            datePicker.setVisibility(View.GONE);
-            dateText.setVisibility(View.GONE);
+        if (dateButton != null) {
+            boolean isDatePickerShown = sharedPrefs.getBoolean(getString(R.string.date_picker_preference_key), true);
+            if (isDatePickerShown) {
+                dateButton.setVisibility(View.VISIBLE);
+            } else {
+                dateButton.setVisibility(View.GONE);
+            }
         }
 
         String result = sharedPrefs.getString(getString(R.string.time_format_preference_key), "12 hour");
@@ -148,6 +181,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             is12HourFormat = false;
         }
+        updateInputButtons();
     }
 
     private void setDefaultTargetSpinnerSelection(Spinner targetTimeZoneSpinner) {
@@ -194,23 +228,24 @@ public class MainActivity extends AppCompatActivity {
 
         daylightSavingsText.setVisibility(View.VISIBLE);
 
+        String shortName = sourceTimeZone.getDisplayName(false, TimeZone.SHORT);
         if (isObservingDaylightSavings == false) {
-            if (sourceTimeZone.getDisplayName(false, TimeZone.SHORT).equals("GMT-07:00")) {
-                daylightSavingsText.setText(String.format(DST_NOT_OBSERVED, "PST (GMT-08:00)"));
-            } else if (sourceTimeZone.getDisplayName(false, TimeZone.SHORT).equals("GMT-04:00")) {
-                daylightSavingsText.setText(String.format(DST_NOT_OBSERVED, "EST (GMT-05:00)"));
-            } else if (sourceTimeZone.getDisplayName(false, TimeZone.SHORT).equals("GMT+02:00")) {
-                daylightSavingsText.setText(String.format(DST_NOT_OBSERVED, "CET (GMT+01:00)"));
+            if (shortName.equals("GMT-07:00")) {
+                daylightSavingsText.setText(String.format(DST_NOT_OBSERVED, "PST (UTC-08:00)"));
+            } else if (shortName.equals("GMT-04:00")) {
+                daylightSavingsText.setText(String.format(DST_NOT_OBSERVED, "EST (UTC-05:00)"));
+            } else if (shortName.equals("GMT+02:00")) {
+                daylightSavingsText.setText(String.format(DST_NOT_OBSERVED, "CET (UTC+01:00)"));
             } else {
                 daylightSavingsText.setVisibility(View.GONE);
             }
         } else if (isObservingDaylightSavings == true) {
-            if (sourceTimeZone.getDisplayName(false, TimeZone.SHORT).equals("GMT-08:00")) {
-                daylightSavingsText.setText(String.format(DST_OBSERVED, "PDT (GMT-07:00)"));
-            } else if (sourceTimeZone.getDisplayName(false, TimeZone.SHORT).equals("GMT-05:00")) {
-                daylightSavingsText.setText(String.format(DST_OBSERVED, "EDT (GMT-04:00)"));
-            } else if (sourceTimeZone.getDisplayName(false, TimeZone.SHORT).equals("GMT+01:00")) {
-                daylightSavingsText.setText(String.format(DST_OBSERVED, "CEST (GMT+02:00)"));
+            if (shortName.equals("GMT-08:00")) {
+                daylightSavingsText.setText(String.format(DST_OBSERVED, "PDT (UTC-07:00)"));
+            } else if (shortName.equals("GMT-05:00")) {
+                daylightSavingsText.setText(String.format(DST_OBSERVED, "EDT (UTC-04:00)"));
+            } else if (shortName.equals("GMT+01:00")) {
+                daylightSavingsText.setText(String.format(DST_OBSERVED, "CEST (UTC+02:00)"));
             } else {
                 daylightSavingsText.setVisibility(View.GONE);
             }
@@ -366,22 +401,10 @@ public class MainActivity extends AppCompatActivity {
         TextView currentTimeZone = (TextView) findViewById(R.id.current_timezone);
         TimeZone tz = TimeZone.getDefault();
         currentTimeZone.setText("(you are in the " + tz.getID() + " timezone, " +
-                tz.getDisplayName(false, TimeZone.SHORT) + ")");
+                tz.getDisplayName(false, TimeZone.SHORT).replace("GMT", "UTC") + ")");
     }
 
     private Calendar getInputDateAndTime() {
-        DatePicker datePicker = (DatePicker) findViewById(R.id.datePicker);
-        int day = datePicker.getDayOfMonth();
-        int month = datePicker.getMonth(); // returns 0-11
-        int year = datePicker.getYear();
-
-        TimePicker timePicker = (TimePicker) findViewById(R.id.timePicker);
-        int hour = timePicker.getCurrentHour(); // Returns 0-23
-        int minute = timePicker.getCurrentMinute();
-
-        Calendar date = new GregorianCalendar();
-        date.set(year, month, day, hour, minute);
-
-        return date;
+        return (Calendar) inputCalendar.clone();
     }
 }

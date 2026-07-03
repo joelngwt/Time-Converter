@@ -12,13 +12,13 @@
 
     <!-- "From" timezone choices for dropdown menu -->
     <string-array name="timezones_array">
-        <item>PST (GMT -8)</item>
-        <item>PDT (GMT -7)</item>
-        <item>EST (GMT -5)</item>
-        <item>EDT (GMT -4)</item>
-        <item>CET (GMT +1)</item>
-        <item>CEST (GMT +2)</item>
-        <item>SGT (GMT +8)</item>
+        <item>PST (UTC -8)</item>
+        <item>PDT (UTC -7)</item>
+        <item>EST (UTC -5)</item>
+        <item>EDT (UTC -4)</item>
+        <item>CET (UTC +1)</item>
+        <item>CEST (UTC +2)</item>
+        <item>SGT (UTC +8)</item>
     </string-array>
 
     <!-- Preference Strings -->

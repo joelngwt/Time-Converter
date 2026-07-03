@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace 'com.example.android.timeconverter'
+    namespace 'bloodelves88.android.timeconverter'
     compileSdkVersion 35
     defaultConfig {
         applicationId 'bloodelves88.android.timeconverter'
