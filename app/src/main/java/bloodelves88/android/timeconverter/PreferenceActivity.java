@@ -1,5 +1,6 @@
 package bloodelves88.android.timeconverter;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
@@ -54,10 +55,30 @@ public class PreferenceActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public static class AppPreferences extends PreferenceFragmentCompat {
+    public static class AppPreferences extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.preferences, rootKey);
+        }
+
+        @Override
+        public void onResume() {
+            super.onResume();
+            getPreferenceManager().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+        }
+
+        @Override
+        public void onPause() {
+            super.onPause();
+            getPreferenceManager().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
+        }
+
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if (getString(R.string.theme_preference_key).equals(key)) {
+                String themeValue = sharedPreferences.getString(key, "system");
+                TimeConverterApplication.applyTheme(themeValue);
+            }
         }
     }
 }

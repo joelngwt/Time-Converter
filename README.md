@@ -1,7 +1,14 @@
 # Time Converter
-An Android app to convert the time from different timezones
+An Android app to convert time between different time zones
 
-# Why I'm Making This
-As a gamer who doesn't live in the USA, I often see announcements from games about maintenance and patches that come with timezones such as PDT and PST. I can never seem to remember how many hours behind PDT and PST are, so I decided to make an app.
+Time zones supported:
+- PST (UTC -8)
+- PDT (UTC -7)
+- EST (UTC -5)
+- EDT (UTC -4)
+- CET (UTC +1)
+- CEST (UTC +2)
+- SGT (UTC +8)
 
-Also, it's simple enough to be my very first Android app. 
+# Screenshots
+<img width="540" height="594" alt="Screenshot_2026_07_03_21_57_27_74_ca88831d416824a6337c02d921564460" src="https://github.com/user-attachments/assets/20c17765-cc11-43c3-9c79-0bcb4651aca7" />

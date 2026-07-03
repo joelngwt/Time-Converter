@@ -14,4 +14,12 @@
         android:key="@string/time_format_preference_key"
         android:title="@string/time_format_title"
         app:useSimpleSummaryProvider="true" />
+
+    <ListPreference
+        android:defaultValue="system"
+        android:entries="@array/theme_entries"
+        android:entryValues="@array/theme_values"
+        android:key="@string/theme_preference_key"
+        android:title="@string/theme_title"
+        app:useSimpleSummaryProvider="true" />
 </PreferenceScreen>

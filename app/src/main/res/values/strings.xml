@@ -26,11 +26,24 @@
     <string name="time_format_title">Time format</string>
     <string name="time_format_summary">12 hour or 24 hour formats</string>
     <string name="time_format_preference_key">Time Format Key</string>
+    <string name="theme_preference_key">theme_preference</string>
+    <string name="theme_title">Theme</string>
 
     <!-- Time formats -->
     <string-array name="time_formats_array">
         <item>12 hour</item>
         <item>24 hour</item>
+    </string-array>
+
+    <string-array name="theme_entries">
+        <item>System default</item>
+        <item>Light</item>
+        <item>Dark</item>
+    </string-array>
+    <string-array name="theme_values">
+        <item>system</item>
+        <item>light</item>
+        <item>dark</item>
     </string-array>
 
 </resources>
